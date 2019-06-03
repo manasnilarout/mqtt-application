@@ -1,6 +1,6 @@
 // controller.js
 const mqtt = require('mqtt')
-const client = mqtt.connect('mqtt://0.0.0.0:3005')
+const client = mqtt.connect('mqtt://0.0.0.0:1883')
 
 var garageState = ''
 var connected = false
@@ -17,23 +17,22 @@ client.on('message', (topic, message) => {
     case 'garage/state':
       return handleGarageState(message)
   }
-  console.log('No handler for topic %s', topic)
+  console.log(`No handler for topic ${topic}`)
 })
 
 function handleGarageConnected (message) {
-  console.log('garage connected status %s', message)
+  console.log(`garage connected status ${message}`)
   connected = (message.toString() === 'true')
 }
 
 function handleGarageState (message) {
-  garageState = message
-  console.log('garage state update to %s', message)
+  garageState = message.toString()
+  console.log(`garage state update to ${message.toString()}`)
 }
 
 function openGarageDoor () {
   // can only open door if we're connected to mqtt and door isn't already open
   if (connected && garageState !== 'open') {
-    // Ask the door to open
     client.publish('garage/open', 'true')
   }
 }
@@ -41,12 +40,9 @@ function openGarageDoor () {
 function closeGarageDoor () {
   // can only close door if we're connected to mqtt and door isn't already closed
   if (connected && garageState !== 'closed') {
-    // Ask the door to close
     client.publish('garage/close', 'true')
   }
 }
-
-// --- For Demo Purposes Only ----//
 
 // simulate opening garage door
 setTimeout(() => {

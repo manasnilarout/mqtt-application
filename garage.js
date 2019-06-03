@@ -1,6 +1,6 @@
 // garage.js
 const mqtt = require('mqtt')
-const client = mqtt.connect('mqtt://0.0.0.0:3005')
+const client = mqtt.connect('mqtt://0.0.0.0:1883')
 
 /**
  * The state of the garage, defaults to closed
@@ -18,7 +18,7 @@ client.on('connect', () => {
 })
 
 client.on('message', (topic, message) => {
-  console.log('received message %s %s', topic, message)
+  console.log(`received message ${topic} ${message}`)
   switch (topic) {
     case 'garage/open':
       return handleOpenRequest(message)
@@ -51,7 +51,7 @@ function handleCloseRequest (message) {
     state = 'closing'
     sendStateUpdate()
 
-    // simulate door closed after 5 seconds (would be listening to hardware)
+    // simulating door closed after 5 seconds (would be listening to hardware)
     setTimeout(() => {
       state = 'closed'
       sendStateUpdate()
