@@ -1,61 +1,73 @@
-// garage.js
-const mqtt = require('mqtt')
-const client = mqtt.connect('mqtt://0.0.0.0:1883')
+const mqtt = require('mqtt');
+const client = mqtt.connect('mqqt://127.0.0.1');
+
+// constants
+const TWO_SECONDS = 2000;
+const CLOSED = 'closed';
+const OPENED = 'opened';
+const CLOSING = 'closing';
+const OPENING = 'opening';
+const CONNECTED = 'connected';
+const DISCONNECTED = 'disconnected';
+
+function log (text) {
+  console.log('Garage: ', text);
+}
 
 /**
  * The state of the garage, defaults to closed
- * Possible states : closed, opening, open, closing
+ * Possible states : [closed, opening, open, closing]
  */
-var state = 'closed'
+var state = CLOSED;
 
 client.on('connect', () => {
-  client.subscribe('garage/open')
-  client.subscribe('garage/close')
+  client.subscribe('garage/open');
+  client.subscribe('garage/close');
 
   // Inform controllers that garage is connected
-  client.publish('garage/connected', 'true')
-  sendStateUpdate()
+  client.publish('garage/connected', CONNECTED);
+  sendStateUpdate();
 })
 
 client.on('message', (topic, message) => {
-  console.log(`received message ${topic} ${message}`)
+  log(`received message ${topic} ${message}`)
   switch (topic) {
     case 'garage/open':
-      return handleOpenRequest(message)
+      return handleOpenRequest(message);
     case 'garage/close':
-      return handleCloseRequest(message)
+      return handleCloseRequest(message);
   }
 })
 
 function sendStateUpdate () {
-  console.log('sending state %s', state)
-  client.publish('garage/state', state)
+  log(`sending state ${state}`);
+  client.publish('garage/state', state);
 }
 
 function handleOpenRequest (message) {
-  if (state !== 'open' && state !== 'opening') {
-    console.log('opening garage door')
-    state = 'opening'
-    sendStateUpdate()
+  if (state !== OPENED && state !== OPENING) {
+    log('opening garage door');
+    state = OPENING;
+    sendStateUpdate();
 
-    // simulate door open after 5 seconds (would be listening to hardware)
+    // simulate door open after 2 seconds (would be listening to hardware)
     setTimeout(() => {
-      state = 'open'
-      sendStateUpdate()
-    }, 5000)
+      state = OPENED;
+      sendStateUpdate();
+    }, TWO_SECONDS);
   }
 }
 
 function handleCloseRequest (message) {
-  if (state !== 'closed' && state !== 'closing') {
-    state = 'closing'
-    sendStateUpdate()
+  if (state !== CLOSED && state !== CLOSING) {
+    state = CLOSING;
+    sendStateUpdate();
 
-    // simulating door closed after 5 seconds (would be listening to hardware)
+    // simulating door closed after 2 seconds (would be listening to hardware)
     setTimeout(() => {
-      state = 'closed'
-      sendStateUpdate()
-    }, 5000)
+      state = CLOSED;
+      sendStateUpdate();
+    }, TWO_SECONDS);
   }
 }
 
@@ -64,15 +76,16 @@ function handleCloseRequest (message) {
  */
 function handleAppExit (options, err) {
   if (err) {
-    console.log(err.stack)
+    log('Stopping process.');
+    log(err);
   }
 
   if (options.cleanup) {
-    client.publish('garage/connected', 'false')
+    client.publish('garage/connected', DISCONNECTED);
   }
 
   if (options.exit) {
-    process.exit()
+    process.exit();
   }
 }
 
@@ -83,8 +96,10 @@ process.on('exit', handleAppExit.bind(null, {
   cleanup: true
 }))
 process.on('SIGINT', handleAppExit.bind(null, {
+  cleanup: true,
   exit: true
 }))
 process.on('uncaughtException', handleAppExit.bind(null, {
+  cleanup: true,
   exit: true
 }))
