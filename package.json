@@ -14,8 +14,5 @@
   "author": "Manas Ranjan",
   "dependencies": {
     "mqtt": "^1.6.3"
-  },
-  "devDependencies": {
-    "standard": "^5.4.1"
   }
 }
