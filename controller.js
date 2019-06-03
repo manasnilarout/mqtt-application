@@ -8,12 +8,13 @@ const CONNECTED_STATUS = 'connected';
 const OPEN_STATE = 'open';
 const CLOSED_STATE = 'closed';
 
+// custom functions to print logs 
 function log (text) {
   console.log('Controller: ', text);
 }
 
-var garageState = '';
-var connected = false;
+let garageState = '';
+let connected = false;
 
 client.on('connect', () => {
   client.subscribe('garage/connected');

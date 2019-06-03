@@ -10,6 +10,7 @@ const OPENING = 'opening';
 const CONNECTED = 'connected';
 const DISCONNECTED = 'disconnected';
 
+// custom functions to print logs
 function log (text) {
   console.log('Garage: ', text);
 }
@@ -18,7 +19,7 @@ function log (text) {
  * The state of the garage, defaults to closed
  * Possible states : [closed, opening, open, closing]
  */
-var state = CLOSED;
+let state = CLOSED;
 
 client.on('connect', () => {
   client.subscribe('garage/open');
