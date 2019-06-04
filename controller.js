@@ -1,9 +1,16 @@
 const mqtt = require('mqtt');
-const client = mqtt.connect('mqqt://127.0.0.1');
+const client = mqtt.connect('mqqt://0.0.0.0:3005');
 
 // constants
 const IDEAL_TIME_OUT = 5000;
-const TRUE_STATUS = 'true';
+const OPEN_DOOR = {
+  type: 'garage',
+  status: 'open'
+};
+const CLOSE_DOOR = {
+  type: 'garage',
+  status: 'close'
+};
 const CONNECTED_STATUS = 'connected';
 const OPEN_STATE = 'open';
 const CLOSED_STATE = 'closed';
@@ -16,48 +23,52 @@ var garageState = '';
 var connected = false;
 
 client.on('connect', () => {
-  client.subscribe('garage/connected');
-  client.subscribe('garage/state');
-  client.subscribe('garage/last-will');
+  client.subscribe('garage');
 })
 
 client.on('message', (topic, message) => {
-  switch (topic) {
-    case 'garage/connected':
-      return handleGarageConnected(message);
-    case 'garage/state':
-      return handleGarageState(message);
-    case 'garage/last-will':
-      return handleDisconnection(message);
+  let messageObject = {};
+  try {
+    messageObject = JSON.parse(message.toString());
+  } catch (e) {
+    log(`Got an error: ${e.message}`);
   }
-  log(`No handler for topic: ${topic}`);
+  switch (messageObject.type) {
+    case 'connection':
+      return handleGarageConnected(messageObject);
+    case 'state':
+      return handleGarageState(messageObject);
+    case 'last-will':
+      return handleDisconnection(messageObject);
+  }
+  log(`No handler for topic: ${messageObject.type}`);
 });
 
 function handleGarageConnected (message) {
-  log(`Garage connection status ${message}`);
-  connected = (message.toString() === CONNECTED_STATUS);
+  log(`Garage connection status ${message.status}`);
+  connected = (message.status === CONNECTED_STATUS);
 }
 
 function handleGarageState (message) {
-  garageState = message.toString();
+  garageState = message.currentState;
   log(`Garage state updated to: ${garageState}`);
 }
 
 function handleDisconnection (message) {
-  log(`Garage got disconnected with message ${message.toString()}`);
+  log(`Garage got disconnected with message ${message.message}`);
 }
 
 function openGarageDoor () {
   // can only open door if we're connected to mqtt and door isn't already open
   if (connected && garageState !== OPEN_STATE) {
-    client.publish('garage/open', TRUE_STATUS);
+    client.publish('garage-update', JSON.stringify(OPEN_DOOR));
   }
 }
 
 function closeGarageDoor () {
   // can only close door if we're connected to mqtt and door isn't already closed
   if (connected && garageState !== CLOSED_STATE) {
-    client.publish('garage/close', TRUE_STATUS);
+    client.publish('garage-update', JSON.stringify(CLOSE_DOOR));
   }
 }
 
