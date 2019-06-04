@@ -1,5 +1,15 @@
 const mqtt = require('mqtt');
-const client = mqtt.connect('mqqt://0.0.0.0:3005');
+
+// connection parameters
+const MQTT_URL = 'mqqt://0.0.0.0:1883';
+const OPTIONS = {
+  keeplive: 10,
+  clean: false,
+  clientId: 'mqttjs_controller'
+}
+
+// connecting to client
+const client = mqtt.connect(MQTT_URL, OPTIONS);
 
 // constants
 const IDEAL_TIME_OUT = 5000;
@@ -23,7 +33,7 @@ var garageState = '';
 var connected = false;
 
 client.on('connect', () => {
-  client.subscribe('garage');
+  client.subscribe('garage', {qos:1});
 })
 
 client.on('message', (topic, message) => {
@@ -61,20 +71,25 @@ function handleDisconnection (message) {
 function openGarageDoor () {
   // can only open door if we're connected to mqtt and door isn't already open
   if (connected && garageState !== OPEN_STATE) {
-    client.publish('garage-update', JSON.stringify(OPEN_DOOR));
+    client.publish('garage-update', JSON.stringify(OPEN_DOOR), { qos: 1 });
   }
 }
 
 function closeGarageDoor () {
   // can only close door if we're connected to mqtt and door isn't already closed
   if (connected && garageState !== CLOSED_STATE) {
-    client.publish('garage-update', JSON.stringify(CLOSE_DOOR));
+    client.publish('garage-update', JSON.stringify(CLOSE_DOOR), { qos: 1 });
   }
 }
 
 // simulate garage door
 async function simulateDoors () {
+  let count = 0;
   while (true) {
+    ++count;
+    if (count > 10) {
+      throw new Error('Controller error.');
+    }
     await simulateOpenDoor();
     await simulateCloseDoor();
   }

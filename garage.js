@@ -1,10 +1,10 @@
 const mqtt = require('mqtt');
 
 // connection parameters
-const MQTT_URL = 'mqqt://0.0.0.0:3005';
+const MQTT_URL = 'mqqt://0.0.0.0:3006';
 const OPTIONS = {
   keepalive: 10,
-  clean: true,
+  clean: false,
   clientId: 'mqttjs_garage',
   will: {
     topic: 'garage',
@@ -45,7 +45,7 @@ function log (text) {
 var state = CLOSED;
 
 client.on('connect', () => {
-  client.subscribe('garage-update');
+  client.subscribe('garage-update', {qos:1});
 
   // Inform controllers that garage is connected
   client.publish('garage', JSON.stringify(CONNECTED));
