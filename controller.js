@@ -18,6 +18,7 @@ var connected = false;
 client.on('connect', () => {
   client.subscribe('garage/connected');
   client.subscribe('garage/state');
+  client.subscribe('garage/last-will');
 })
 
 client.on('message', (topic, message) => {
@@ -26,6 +27,8 @@ client.on('message', (topic, message) => {
       return handleGarageConnected(message);
     case 'garage/state':
       return handleGarageState(message);
+    case 'garage/last-will':
+      return handleDisconnection(message);
   }
   log(`No handler for topic: ${topic}`);
 })
@@ -37,7 +40,11 @@ function handleGarageConnected (message) {
 
 function handleGarageState (message) {
   garageState = message.toString();
-  log(`Garage state updated to: ${message.toString()}`);
+  log(`Garage state updated to: ${garageState}`);
+}
+
+function handleDisconnection (message) {
+  log(`Garage got disconnected with message ${message.toString()}`);
 }
 
 function openGarageDoor () {

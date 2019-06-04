@@ -1,5 +1,23 @@
 const mqtt = require('mqtt');
-const client = mqtt.connect('mqqt://127.0.0.1');
+
+// connection parameters
+const MQTT_URL = 'mqqt://127.0.0.1';
+const OPTIONS = {
+  keepalive: 10,
+  clean: false,
+  clientId: 'mqttjs_garage',
+  will: {
+    topic: 'garage/last-will',
+    payload: 'Disconnected unexpectedly',
+    qos: 2,
+    properties: {
+      willDelayInterval: 3
+    }
+  }
+}
+
+// connecting to client
+const client = mqtt.connect(MQTT_URL, OPTIONS);
 
 // constants
 const TWO_SECONDS = 2000;
@@ -58,7 +76,14 @@ function handleOpenRequest (message) {
   }
 }
 
+let count = 0;
 function handleCloseRequest (message) {
+  // Intentional error to check last will message
+  ++count;
+  log(count);
+  if (count === 5) {
+    throw new Error('Intentional Error');
+  }
   if (state !== CLOSED && state !== CLOSING) {
     state = CLOSING;
     sendStateUpdate();
@@ -71,35 +96,35 @@ function handleCloseRequest (message) {
   }
 }
 
-/**
- * Want to notify controller that garage is disconnected before shutting down
- */
-function handleAppExit (options, err) {
-  if (err) {
-    log('Stopping process.');
-    log(err);
-  }
+// /**
+//  * Want to notify controller that garage is disconnected before shutting down
+//  */
+// function handleAppExit (options, err) {
+//   if (err) {
+//     log('Stopping process.');
+//     log(err);
+//   }
 
-  if (options.cleanup) {
-    client.publish('garage/connected', DISCONNECTED);
-  }
+//   if (options.cleanup) {
+//     client.publish('garage/connected', DISCONNECTED);
+//   }
 
-  if (options.exit) {
-    process.exit();
-  }
-}
+//   if (options.exit) {
+//     process.exit();
+//   }
+// }
 
-/**
- * Handle the different ways an application can shutdown
- */
-process.on('exit', handleAppExit.bind(null, {
-  cleanup: true
-}))
-process.on('SIGINT', handleAppExit.bind(null, {
-  cleanup: true,
-  exit: true
-}))
-process.on('uncaughtException', handleAppExit.bind(null, {
-  cleanup: true,
-  exit: true
-}))
+// /**
+//  * Handle the different ways an application can shutdown
+//  */
+// process.on('exit', handleAppExit.bind(null, {
+//   cleanup: true
+// }))
+// process.on('SIGINT', handleAppExit.bind(null, {
+//   cleanup: true,
+//   exit: true
+// }))
+// process.on('uncaughtException', handleAppExit.bind(null, {
+//   cleanup: true,
+//   exit: true
+// }))
