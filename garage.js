@@ -92,36 +92,3 @@ function handleCloseRequest (message) {
     }, TWO_SECONDS);
   }
 }
-
-// /**
-//  * Want to notify controller that garage is disconnected before shutting down
-//  */
-// function handleAppExit (options, err) {
-//   if (err) {
-//     log('Stopping process.');
-//     log(err);
-//   }
-
-//   if (options.cleanup) {
-//     client.publish('garage/connected', DISCONNECTED);
-//   }
-
-//   if (options.exit) {
-//     process.exit();
-//   }
-// }
-
-// /**
-//  * Handle the different ways an application can shutdown
-//  */
-// process.on('exit', handleAppExit.bind(null, {
-//   cleanup: true
-// }))
-// process.on('SIGINT', handleAppExit.bind(null, {
-//   cleanup: true,
-//   exit: true
-// }))
-// process.on('uncaughtException', handleAppExit.bind(null, {
-//   cleanup: true,
-//   exit: true
-// }))

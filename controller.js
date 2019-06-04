@@ -31,7 +31,7 @@ client.on('message', (topic, message) => {
       return handleDisconnection(message);
   }
   log(`No handler for topic: ${topic}`);
-})
+});
 
 function handleGarageConnected (message) {
   log(`Garage connection status ${message}`);
