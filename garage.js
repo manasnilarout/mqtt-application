@@ -4,15 +4,12 @@ const mqtt = require('mqtt');
 const MQTT_URL = 'mqqt://127.0.0.1';
 const OPTIONS = {
   keepalive: 10,
-  clean: false,
+  clean: true,
   clientId: 'mqttjs_garage',
   will: {
     topic: 'garage/last-will',
     payload: 'Disconnected unexpectedly',
-    qos: 2,
-    properties: {
-      willDelayInterval: 3
-    }
+    qos: 2
   }
 }
 
