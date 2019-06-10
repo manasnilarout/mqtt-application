@@ -1,11 +1,10 @@
 {
   "name": "playing-with-mqtt",
   "version": "1.0.0",
-  "description": "A sample application built that shows how MQTT could be used to manage a garage door system.",
+  "description": "A sample application, that shows how MQTT could be used to manage a garage door system.",
   "main": "controller.js",
   "scripts": {
-    "start": "node controller.js",
-    "style": "standard"
+    "start": "node controller.js"
   },
   "repository": {
     "type": "git",
