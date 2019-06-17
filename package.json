@@ -4,7 +4,8 @@
   "description": "A sample application, that shows how MQTT could be used to manage a garage door system.",
   "main": "controller.js",
   "scripts": {
-    "start": "node controller.js"
+    "controller": "node controller.js",
+    "garage": "node garage.js"
   },
   "repository": {
     "type": "git",
